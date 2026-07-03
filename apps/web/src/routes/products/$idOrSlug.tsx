@@ -34,7 +34,7 @@ function ProductDetailPage() {
 
 	if (productQuery.isLoading) {
 		return (
-			<PageShell width="narrow" className="space-y-4">
+			<PageShell width="wide" className="space-y-4">
 				<Skeleton className="h-8 w-48 max-w-full" />
 				<Skeleton className="aspect-video w-full" />
 				<Skeleton className="h-24 w-full" />
@@ -44,7 +44,7 @@ function ProductDetailPage() {
 
 	if (productQuery.isError || !product) {
 		return (
-			<PageShell width="narrow">
+			<PageShell width="wide">
 				<Empty className="border">
 					<EmptyHeader>
 						<EmptyTitle>Product not found</EmptyTitle>
@@ -60,7 +60,7 @@ function ProductDetailPage() {
 	}
 
 	return (
-		<PageShell width="narrow" className="space-y-6">
+		<PageShell width="wide" className="space-y-6">
 			<Link to="/" className="text-muted-foreground text-sm hover:underline">
 				← Back to shop
 			</Link>
