@@ -23,6 +23,7 @@
 		"clsx": "^2.1.1",
 		"dotenv": "catalog:",
 		"next-themes": "catalog:",
+		"nitro": "3.0.260610-beta",
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"shadcn": "^4.13.0",
