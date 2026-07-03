@@ -1,86 +1,90 @@
-# minishop-fe
+# MiniShop (Frontend)
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Start, and more.
+## 1. Ringkasan
 
-## Features
+MiniShop adalah toko online demo: katalog produk, keranjang di browser, checkout ke API, dan panel admin untuk mengelola produk serta melihat pesanan. Frontend ini memanggil REST API **minishop-be**; tidak ada database di sisi web.
 
-- **TypeScript** - For type safety and improved developer experience
-- **TanStack Start** - SSR framework with TanStack Router
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **Shared UI package** - shadcn/ui primitives live in `packages/ui`
-- **Biome** - Linting and formatting
-- **Turborepo** - Optimized monorepo build system
+Alur pengguna: jelajahi & filter produk → detail → tambah ke cart → isi data pelanggan → checkout → halaman sukses. Operator demo memakai bearer token di `/admin` untuk CRUD produk dan daftar/detail order.
 
-## Getting Started
+## 2. Tech stack
 
-First, install the dependencies:
+| Teknologi | Peran | Alasan singkat |
+|-----------|--------|----------------|
+| **React 19** | UI | Ekosistem matang, cocok dengan TanStack Start. |
+| **TanStack Start + Router** | SSR, routing file-based | Satu codebase full-stack ringan; rute di `apps/web/src/routes`. |
+| **TanStack Query** | Data server (katalog, admin) | Cache, loading/error, refetch tanpa boilerplate Redux. |
+| **Tailwind CSS 4** | Styling | Cepat, konsisten dengan token di `packages/ui`. |
+| **shadcn/ui** (`packages/ui`) | Komponen | Primitif terbagi antar app; tidak bikin design system baru. |
+| **Turborepo + pnpm** | Monorepo | Build `web` + paket `ui` / `env` terkoordinasi. |
+| **Biome** | Lint & format | Satu tool, cepat. |
+| **Vite 8 + Nitro** | Build & deploy (mis. Vercel) | Output serverless untuk SSR Start. |
+
+Tipe API di-generate dari OpenAPI backend (`src/api/types.ts` di repo backend / salinan di monorepo jika ada).
+
+## 3. Menjalankan lokal
+
+**Prasyarat:** Node.js, pnpm 10, API **minishop-be** jalan (default `http://localhost:8000`), Postgres backend sudah migrate + seed (lihat README backend).
 
 ```bash
 pnpm install
+cp apps/web/.env.example apps/web/.env
 ```
 
-Then, run the development server:
+Isi `apps/web/.env`:
+
+```env
+VITE_SERVER_URL=http://localhost:8000
+```
+
+Jalankan dev (port **3001**):
 
 ```bash
-pnpm run dev
+pnpm run dev:web
 ```
 
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
+Buka [http://localhost:3001](http://localhost:3001).
 
-## Demo admin access
+**Admin demo:** buka [http://localhost:3001/admin](http://localhost:3001/admin), tempel bearer token yang sama dengan `INTERNAL_KEY` di backend (lihat README minishop-be). Token disimpan di `sessionStorage` (hilang saat tab ditutup).
 
-For testing `/admin` (products, orders), use this bearer token. Paste it on [http://localhost:3001/admin](http://localhost:3001/admin) (session storage only; cleared when the tab closes).
-
-```
-5c9fc49b51517fdaff858e700654565b6752bd3ee5f8205a38ac17a2cedd4226
-```
-
-Backend `INTERNAL_KEY` must match this value. Set `VITE_SERVER_URL` to your API origin (see `apps/web/.env.example`).
-
-## UI Customization
-
-React web apps in this stack share shadcn/ui primitives through `packages/ui`.
-
-- Change design tokens and global styles in `packages/ui/src/styles/globals.css`
-- Update shared primitives in `packages/ui/src/components/*`
-- Adjust shadcn aliases or style config in `packages/ui/components.json` and `apps/web/components.json`
-
-### Add more shared components
-
-Run this from the project root to add more primitives to the shared UI package:
+**Build:**
 
 ```bash
-npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
+pnpm run build
 ```
 
-Import shared components like this:
+Deploy (Vercel): set **Root Directory** `apps/web`, env `VITE_SERVER_URL` ke origin API, dan pastikan `VITE_SERVER_URL` tercantum di `turbo.json` → `build.env` agar Turbo tidak cache build tanpa env.
 
-```tsx
-import { Button } from "@minishop-fe/ui/components/button";
-```
+## 4. Endpoint API (yang dipakai frontend)
 
-### Add app-specific blocks
+Semua respons memakai envelope `{ "success", "error", "data" }`. Harga dalam **rupiah utuh (integer)**. Dokumen lengkap: `{API}/docs` dan `docs/api/openapi.yaml` di repo backend.
 
-If you want to add app-specific blocks instead of shared primitives, run the shadcn CLI from `apps/web`.
+| Method | Path | Auth | Contoh request | Contoh `data` (sukses) |
+|--------|------|------|----------------|-------------------------|
+| GET | `/v1/categories` | — | — | `{ "items": [{ "id", "name", "slug", ... }], "meta": { "page", "limit", "total", "total_pages" } }` |
+| GET | `/v1/products?page=1&limit=12&search=...&category_slug=electronics&sort=created_at_desc` | — | — | `{ "items": [{ "id", "name", "slug", "price", "stock", "image_url", ... }], "meta": {...} }` |
+| GET | `/v1/products/{id_or_slug}` | — | — | `{ "id", "name", "description", "price", "stock", ... }` |
+| POST | `/v1/checkout` | — | `{ "customer_name", "customer_email", "customer_phone?", "shipping_address?", "items": [{ "product_id", "quantity" }] }` | `{ "order_id", "order_number", "status", "total", ... }` (201) |
+| GET | `/internal/categories` | Bearer `INTERNAL_KEY` | — | sama seperti list kategori |
+| POST/PATCH/DELETE | `/internal/categories`, `/internal/categories/{id_or_slug}` | Bearer | JSON body (admin) | kategori tunggal atau null |
+| GET/POST/PATCH/DELETE | `/internal/products`, `/internal/products/{id_or_slug}` | Bearer | POST/PATCH: `multipart/form-data` (name, price, category_id, stock, image?) | produk / list |
+| GET | `/internal/orders?page=1&limit=20&customer_email=...&order_number=...` | Bearer | — | `{ "items": [Order], "meta" }` |
+| GET | `/internal/orders/{id_or_order_number}` | Bearer | — | Order + `items[]` |
 
-## Git Hooks and Formatting
+Header admin: `Authorization: Bearer <INTERNAL_KEY>`.
 
-- Run checks: `pnpm run check`
+## 5. Known limitations
 
-## Project Structure
+- **Auth admin hanya demo:** token di `sessionStorage`, bukan login/OAuth/refresh token.
+- **Tidak ada SSR prefetch untuk React Query:** data katalog di-fetch di client setelah hydrate; first paint bisa skeleton tanpa request di Network sampai JS jalan.
+- **Cart hanya `localStorage`:** `{ product_id, quantity }`; tidak sinkron antar perangkat; stok divalidasi ulang saat checkout.
+- **Tanpa pembayaran / webhook / ubah status order** di UI; checkout hanya membuat order di backend.
+- **Gambar produk seed** sering tanpa URL (null) sampai di-upload lewat admin.
+- **Chunk JS besar** (~500 KB+) — belum di-split agresif (peringatan Rolldown/Vite).
+- **CORS & `VITE_SERVER_URL`:** harus benar di build/deploy; salah env → tidak ada request API atau URL API salah.
 
-```
-minishop-fe/
-├── apps/
-│   ├── web/         # Frontend application (React + TanStack Start)
-├── packages/
-│   ├── ui/          # Shared shadcn/ui components and styles
-```
+## Skrip
 
-## Available Scripts
-
-- `pnpm run dev`: Start all applications in development mode
-- `pnpm run build`: Build all applications
-- `pnpm run dev:web`: Start only the web application
-- `pnpm run check-types`: Check TypeScript types across all apps
-- `pnpm run check`: Run Biome formatting and linting
+- `pnpm run dev` — semua app di monorepo  
+- `pnpm run dev:web` — hanya web  
+- `pnpm run build` — build turbo  
+- `pnpm run check` — Biome
