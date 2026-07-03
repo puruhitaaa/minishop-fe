@@ -1,3 +1,5 @@
+import { env } from "@minishop-fe/env/web";
+
 import type { components } from "../../../../src/api/types";
 
 import { getAdminToken } from "./admin-token";
@@ -33,11 +35,7 @@ export class ApiRequestError extends Error {
 }
 
 function apiBaseUrl(): string {
-	const base = import.meta.env.VITE_SERVER_URL;
-	if (!base) {
-		throw new ApiRequestError("VITE_SERVER_URL is not set", 0, "CONFIG");
-	}
-	return base.replace(/\/$/, "");
+	return env.VITE_SERVER_URL.replace(/\/$/, "");
 }
 
 function buildUrl(
