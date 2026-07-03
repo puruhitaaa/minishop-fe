@@ -1,22 +1,32 @@
-import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import { AdminNav } from "@/components/admin-nav";
+import { PageHeader, PageShell } from "@/components/page-shell";
+import { Panel } from "@/components/panel";
 
 export const Route = createFileRoute("/admin")({
-  component: AdminLayout,
+	component: AdminLayout,
 });
 
 function AdminLayout() {
-  return (
-    <div className="container mx-auto max-w-6xl space-y-4 px-4 py-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-medium">Admin</h1>
-        <p className="text-sm text-amber-600 dark:text-amber-400">
-          Demo only — bearer token in sessionStorage, not production auth.
-        </p>
-        <AdminNav />
-      </div>
-      <Outlet />
-    </div>
-  );
+	return (
+		<PageShell width="wide" className="space-y-6">
+			<PageHeader
+				eyebrow="Operations"
+				title="Admin console"
+				description="Manage catalog, orders, and demo API access for this storefront."
+			/>
+			<Panel padding="tight" className="space-y-3">
+				<p className="text-muted-foreground text-sm">
+					Demo only: bearer token stored in{" "}
+					<span className="font-mono text-foreground text-xs">
+						sessionStorage
+					</span>
+					, not production auth.
+				</p>
+				<AdminNav />
+			</Panel>
+			<Outlet />
+		</PageShell>
+	);
 }

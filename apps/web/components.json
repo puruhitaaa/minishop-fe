@@ -1,25 +1,25 @@
 {
-  "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "base-rhea",
-  "rsc": false,
-  "tsx": true,
-  "tailwind": {
-    "config": "",
-    "css": "../../packages/ui/src/styles/globals.css",
-    "baseColor": "neutral",
-    "cssVariables": true,
-    "prefix": ""
-  },
-  "iconLibrary": "phosphor",
-  "aliases": {
-    "components": "@/components",
-    "utils": "@minishop-fe/ui/lib/utils",
-    "ui": "@minishop-fe/ui/components",
-    "lib": "@/lib",
-    "hooks": "@/hooks"
-  },
-  "menuColor": "default",
-  "menuAccent": "subtle",
-  "rtl": false,
-  "registries": {}
+	"$schema": "https://ui.shadcn.com/schema.json",
+	"style": "base-rhea",
+	"rsc": false,
+	"tsx": true,
+	"tailwind": {
+		"config": "",
+		"css": "../../packages/ui/src/styles/globals.css",
+		"baseColor": "neutral",
+		"cssVariables": true,
+		"prefix": ""
+	},
+	"iconLibrary": "phosphor",
+	"aliases": {
+		"components": "@/components",
+		"utils": "@minishop-fe/ui/lib/utils",
+		"ui": "@minishop-fe/ui/components",
+		"lib": "@/lib",
+		"hooks": "@/hooks"
+	},
+	"menuColor": "default",
+	"menuAccent": "subtle",
+	"rtl": false,
+	"registries": {}
 }
