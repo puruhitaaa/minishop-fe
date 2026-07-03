@@ -27,6 +27,16 @@ pnpm run dev
 
 Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
 
+## Demo admin access
+
+For testing `/admin` (products, orders), use this bearer token. Paste it on [http://localhost:3001/admin](http://localhost:3001/admin) (session storage only; cleared when the tab closes).
+
+```
+5c9fc49b51517fdaff858e700654565b6752bd3ee5f8205a38ac17a2cedd4226
+```
+
+Backend `INTERNAL_KEY` must match this value. Set `VITE_SERVER_URL` to your API origin (see `apps/web/.env.example`).
+
 ## UI Customization
 
 React web apps in this stack share shadcn/ui primitives through `packages/ui`.
